@@ -30,10 +30,18 @@ def add_content_with_hierarchy(slide, slide_data):
 
         # Add content (as third-level bullet points)
         for content_line in section["Content"]:
-            content_paragraph = text_frame.add_paragraph()
-            content_paragraph.level = 1  # Content level (one level below subtitle)
-            run_content = set_font(content_paragraph, int(section["Font Size"].replace("pt", "")), section["Text Color"])
-            run_content.text = content_line
+            # check if the content line is a list
+            if isinstance(content_line, str):
+                content_paragraph = text_frame.add_paragraph()
+                content_paragraph.level = 1  # Content level (one level below subtitle)
+                run_content = set_font(content_paragraph, int(section["Font Size"].replace("pt", "")), section["Text Color"])
+                run_content.text = content_line
+            if isinstance(content_line, list):
+                for content in content_line:
+                    content_paragraph = text_frame.add_paragraph()
+                    content_paragraph.level = 2 # Content level (two levels below subtitle)
+                    run_content = set_font(content_paragraph, int(section["Font Size"].replace("pt", "")), section["Text Color"])
+                    run_content.text = content
 
 def prevent_overflow(slide):
     """ Adjust font sizes if content is too large for the slide by comparing text box size """
@@ -124,7 +132,7 @@ def create_presentation(slides_data):
 import json
 
 # Load the JSON data from the uploaded file
-json_file_path = 'revised_slides.json'
+json_file_path = 'slides.json'
 with open(json_file_path, 'r') as file:
     slides_data = json.load(file)
 

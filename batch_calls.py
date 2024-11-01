@@ -1,5 +1,4 @@
 from openai import OpenAI
-
 import yaml
 from PyPDF2 import PdfReader
 import re
@@ -111,22 +110,277 @@ def step_1_extract_structure(md_content, title="Extract Markdown Structure"):
 
     return extract_structure_prompt
 
+def step_n_generate_slide_json_prompt(extracted_structure):
+    # Prepare the prompt
+    # generate_slide_json_prompt = f"""
+    #     **Task:**
+
+    #     Create a JSON structure for PowerPoint slides based on the provided content. Each slide should have a unique title that best describes the content on that slide, along with a subtitle and at least one bullet point. Ensure content on each slide does not exceed 90 words (excluding the title), and split content logically into multiple slides.
+
+    #     **Instructions:**
+
+    #     1. **Structure:**
+    #         - Each slide must have a unique, descriptive title that reflects its specific content.
+    #         - Include at least one subtitle and one bullet point on each slide.
+    #         - Limit content to 90 words per slide (excluding the title).
+
+    #     2. **Slide Division:**
+    #         - Split content into multiple slides as needed to maintain a smooth and logical flow.
+    #         - Ensure each slide title accurately reflects the specific content it contains.
+
+    #     3. **Design:**
+    #         - Set title font to 36pt, Dark Blue; subtitle font to 28pt, Black; body text to 20pt, Black.
+    #         - Ensure content fits within the word limit and that slides do not overflow.
+
+    #     4. **Citations:**
+    #         - Use footnotes ([1], [2], etc.) in the slides and compile all citations on a separate "Citations" slide.
+
+    #     **Output Format:**
+    #         - Return a valid JSON structure with no additional text. Each slide should include:
+    #             - "Slide Title" (a unique title for each slide)
+    #             - "Formatted Content" (with subtitle and bullet points)
+    #             - "Font Size" and "Text Color" for each element
+    #             - "Overflow Check" (confirm no overflow)
+    #             - "Citations" (if any)
+
+    #     **Example:**
+
+    #     [
+    #         {{
+    #             "Slide Title": "AI Solutions Across Industries",
+    #             "Formatted Content": [
+    #                 {{
+    #                     "Subtitle": "Neuron Solutions Overview",
+    #                     "Content": [
+    #                         "Neuron Solutions specializes in AI solutions across industries.",
+    #                         "They work with sectors like pharmaceuticals, energy, and engineering [1]."
+    #                     ],
+    #                     "Font Size": "20pt",
+    #                     "Text Color": "Black"
+    #                 }}
+    #             ],
+    #             "Font Size": "36pt",
+    #             "Text Color": "Dark Blue",
+    #             "Overflow Check": "No overflow",
+    #             "Citations": []
+    #         }},
+    #         {{
+    #             "Slide Title": "Citations",
+    #             "Formatted Content": [
+    #                 {{
+    #                     "Content": [
+    #                         "[1] [Neuron Solutions - Your AI consultant](https://www.neuronsolutions.com)"
+    #                     ],
+    #                     "Font Size": "20pt",
+    #                     "Text Color": "Black"
+    #                 }}
+    #             ],
+    #             "Font Size": "36pt",
+    #             "Text Color": "Dark Blue",
+    #             "Overflow Check": "No overflow"
+    #         }}
+    #     ]
+
+    #     **Process:**
+
+    #     Generate the slides in JSON format based on the content, splitting them logically with each slide having a unique, descriptive title, subtitle, and content within 90 words. Return only the JSON output.
+    #     Here is the content:
+    #     '''{extracted_structure}'''
+    # """
+
+    generate_slide_json_prompt = f"""
+            **Task:**
+
+            Create a JSON structure for PowerPoint slides based on the provided content. Your goal is to transform the content into slides that include all key information without unnecessary summarization. Each slide should have a unique title reflecting its specific content, along with subtitles and bullet points that capture all important details. Use hierarchical bullet points to represent any nested information.
+
+            **Instructions:**
+
+            1. **Content Inclusion:**
+            - **Include all key points, facts, and details** from the content.
+            - **Avoid unnecessary summarization**; ensure important information is retained.
+            - Use bullet points to break down the content into digestible pieces.
+            - **Preserve quotes, citations, and specific terminology** as they appear in the content.
+
+            2. **Slide Structure:**
+            - Each slide should have:
+                - A unique, descriptive **Slide Title**.
+                - **Formatted Content** containing:
+                - **Subtitles** where appropriate.
+                - **Bullet Points** with hierarchical structure to represent nested information.
+            - Use hierarchical bullet points for any lists or detailed explanations.
+
+            3. **Design Specifications:**
+            - **Slide Title**: Font Size 36pt, Dark Blue.
+            - **Subtitles**: Font Size 28pt, Black.
+            - **Bullet Points**: Font Size 20pt, Black.
+            - **Text Color**: As specified above.
+
+            4. **Slide Division:**
+            - Split the content logically into multiple slides to ensure clarity.
+            - **If a slide becomes too content-heavy, split it into multiple slides** while maintaining logical flow.
+            - **Do not exceed 7 bullet points per slide** to avoid overcrowding.
+
+            5. **Citations and Links:**
+            - Include citations and hyperlinks as footnotes ([1], [2], etc.) in the bullet points.
+            - Compile all citations on a separate "Citations" slide at the end.
+
+            6. **Formatting Details:**
+            - **Maintain the original wording** as much as possible.
+            - **Retain the structure** of the content, including any emphasis or lists.
+
+            **Output Format:**
+
+            - Return **only** a valid JSON array with no additional text or explanations.
+            - Each slide should be a JSON object containing:
+            - `"Slide Title"`: The title of the slide.
+            - `"Formatted Content"`: A list of content sections, each with:
+                - `"Subtitle"`: (optional) Subtitle text.
+                - `"Content"`: A list of bullet points (strings), including hierarchical bullet points represented as nested lists.
+                - `"Font Size"`: Font size for the content (e.g., "20pt").
+                - `"Text Color"`: Text color (e.g., "Black").
+            - `"Font Size"`: Font size for the slide title (e.g., "36pt").
+            - `"Text Color"`: Text color for the slide title (e.g., "Dark Blue").
+            - `"Overflow Check"`: Confirm "No overflow" or indicate if content needs to be split further.
+            - `"Citations"`: List of citations used on the slide.
+
+            **Example:**
+
+            [
+                {{
+                    "Slide Title": "Executive Summary",
+                    "Formatted Content": [
+                        {{
+                            "Subtitle": "Neuron Solutions Overview",
+                            "Content": [
+                                "Neuron Solutions, operating under the brand neuron.ai, is a consulting firm specializing in AI solutions across various industries.",
+                                [
+                                    "Provides services from conceptualization to implementation of AI projects.",
+                                    "Enables businesses to develop their own AI capabilities or integrate supplier AI systems into operations ([1]).",
+                                    "Client sectors include pharmaceuticals, energy, and engineering."
+                                ],
+                                "Successfully enhanced operational efficiencies through AI-driven solutions."
+                            ],
+                            "Font Size": "20pt",
+                            "Text Color": "Black"
+                        }}
+                    ],
+                    "Font Size": "36pt",
+                    "Text Color": "Dark Blue",
+                    "Overflow Check": "No overflow",
+                    "Citations": ["[1]"]
+                }},
+                {{
+                    "Slide Title": "Innovation in Finance",
+                    "Formatted Content": [
+                        {{
+                            "Subtitle": "AI Transforming Finance",
+                            "Content": [
+                                "Leverages AI to:",
+                                [
+                                    "Transform data analysis.",
+                                    "Improve investment accessibility.",
+                                    "Redefine banking operations."
+                                ],
+                                "Participates in industry conferences like Future of Finance 2024 ([2])."
+                            ],
+                            "Font Size": "20pt",
+                            "Text Color": "Black"
+                        }},
+                        {{
+                            "Subtitle": "AI Launchpad Methodology",
+                            "Content": [
+                                "Combines human intelligence with AI capabilities.",
+                                "Optimizes work processes and enhances customer relations.",
+                                "Positions Neuron Solutions as a key player in AI consulting."
+                            ],
+                            "Font Size": "20pt",
+                            "Text Color": "Black"
+                        }}
+                    ],
+                    "Font Size": "36pt",
+                    "Text Color": "Dark Blue",
+                    "Overflow Check": "No overflow",
+                    "Citations": ["[2]"]
+                }},
+                {{
+                    "Slide Title": "Citations",
+                    "Formatted Content": [
+                        {{
+                            "Content": [
+                                "[1] [Neuron Solutions - Your AI consultant](https://www.neuronsolutions.com)",
+                                "[2] [Artificial Intelligence and the Future of Finance - Neuron Solutions](https://www.neuronsolutions.com/finance)"
+                            ],
+                            "Font Size": "20pt",
+                            "Text Color": "Black"
+                        }}
+                    ],
+                    "Font Size": "36pt",
+                    "Text Color": "Dark Blue",
+                    "Overflow Check": "No overflow"
+                }}
+            ]
+
+            **Process:**
+
+            Transform the provided content into slides as per the instructions, ensuring that **all key information is included and properly structured**. **Do not omit important details or excessively summarize the content**. Use hierarchical bullet points to represent nested information. **Maintain the original wording where possible**. **Return only the JSON output and nothing else.**
+
+            Here is the content:
+
+            '''{extracted_structure}'''
+            """
+
+    return generate_slide_json_prompt
+
 def append_response_to_file(api_response, output_file):
     with open(output_file, 'a') as file:
         file.write(api_response)
         file.write("\n")
 
 def iterative_structure_extraction(markdown_content):
+    all_slides = []
+
     sections = acquire_sections(markdown_content)
-    for i in range(1, len(section_content), 2):
+    
+    for i in range(1, len(sections), 2):
+        # Step 1: Extract structure from the markdown content
         print(f"Processing section {i}...")
         section_title = sections[i].strip()
         section_content = sections[i+1].strip()
         prompt = step_1_extract_structure(title=section_title, md_content=section_content)
         response = call_openai_api(prompt)
-        print("current response: ", response)
+        # print("current response: ", response)
         append_response_to_file(response, 'extracted_structure.txt')
+
+        # Step 2: Generate slide JSON prompt
+        # print("section: ", sections[i])
+        print("Starting to create slide JSON prompt...")
+        slide_json_prompt = step_n_generate_slide_json_prompt(response)
+        json_response = call_openai_api(slide_json_prompt)
+        print("current json response: ", json_response)
+        
+        # Step 3: Parse the JSON response and append to all_slides
+        try:
+            # Extract JSON array from the response
+            json_start = json_response.find('[')
+            json_end = json_response.rfind(']')
+            if json_start != -1 and json_end != -1:
+                json_str = json_response[json_start:json_end+1]
+                slides = json.loads(json_str)
+                all_slides.extend(slides)
+                print("all slides: ", all_slides)
+            else:
+                print(f"JSON not found in the response for section {i//2 + 1}")
+                continue  # Skip this section if JSON is not found
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error in section {i//2 + 1}: {e}")
+            continue  # Skip this section if JSON decoding fails
+
         print("=====================================")
+
+    # Step 4: Write all slides to a JSON file
+    with open('slides.json', 'w') as file:
+        json.dump(all_slides, file, indent=4)
+
 
 def iterative_ppt_generation(structured_file):
     pass
