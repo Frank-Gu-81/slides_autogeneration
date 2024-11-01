@@ -38,10 +38,17 @@ def add_content_with_hierarchy(slide, slide_data):
                 run_content.text = content_line
             if isinstance(content_line, list):
                 for content in content_line:
-                    content_paragraph = text_frame.add_paragraph()
-                    content_paragraph.level = 2 # Content level (two levels below subtitle)
-                    run_content = set_font(content_paragraph, int(section["Font Size"].replace("pt", "")), section["Text Color"])
-                    run_content.text = content
+                    if isinstance(content, str):
+                        content_paragraph = text_frame.add_paragraph()
+                        content_paragraph.level = 2 # Content level (two levels below subtitle)
+                        run_content = set_font(content_paragraph, int(section["Font Size"].replace("pt", "")), section["Text Color"])
+                        run_content.text = content
+                    if isinstance(content, list):
+                        for subcontent in content:
+                            content_paragraph = text_frame.add_paragraph()
+                            content_paragraph.level = 3
+                            run_content = set_font(content_paragraph, int(section["Font Size"].replace("pt", "")), section["Text Color"])
+                            run_content.text = subcontent
 
 def prevent_overflow(slide):
     """ Adjust font sizes if content is too large for the slide by comparing text box size """
