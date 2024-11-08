@@ -157,6 +157,7 @@ generate_slide_json_prompt: |
           "Font Size": "36pt",
           "Text Color": "Dark Blue",
           "Overflow Check": "No overflow",
+          "Citations": ["[1] [Neuron Solutions - Your AI consultant](https://www.neuronsolutions.com)"]
       }},
       {{
           "Slide Title": "Innovation in Finance",
@@ -189,6 +190,7 @@ generate_slide_json_prompt: |
           "Font Size": "36pt",
           "Text Color": "Dark Blue",
           "Overflow Check": "No overflow",
+          "Citations": ["[2] [Artificial Intelligence and the Future of Finance - Neuron Solutions](https://www.neuronsolutions.com/finance)"]
       }},
       {{
           "Slide Title": "Citations",

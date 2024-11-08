@@ -99,7 +99,7 @@ def iterative_ppt_generation(structured_file):
 
 if __name__ == "__main__":
     # Load the markdown file
-    with open('original_report.md', 'r') as file:
+    with open('latest_report.md', 'r') as file:
         markdown_content = file.read()
 
     # Perform iterative structure extraction

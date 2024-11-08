@@ -119,6 +119,7 @@ def create_presentation(slides_data):
 
         # Collect citations for the citation slide
         if "Citations" in slide_data and slide_data["Citations"]:
+            print(slide_data["Citations"])
             for citation in slide_data["Citations"]:
                 citations.append(citation)
 
