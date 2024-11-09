@@ -106,32 +106,34 @@ def create_presentation(slides_data):
 
         # Set the slide title and style it according to specifications
         title = slide.shapes.title
-        title.text = slide_data["Slide Title"]
-        
-        # Set the title font size and color
-        title_format = title.text_frame.paragraphs[0]
-        title_format.font.size = Pt(int(slide_data["Font Size"].replace("pt", "")))
-        if slide_data["Text Color"].lower() == "dark blue":
-            title_format.font.color.rgb = RGBColor(0, 0, 139)  # Dark blue color
-        
-        # Add the formatted content with hierarchy
-        add_content_with_hierarchy(slide, slide_data)
-
-        # Collect citations for the citation slide
-        if "Citations" in slide_data and slide_data["Citations"]:
-            print(slide_data["Citations"])
-            for citation in slide_data["Citations"]:
-                citations.append(citation)
+        if slide_data["Slide Title"] != "Citations":
+            title.text = slide_data["Slide Title"]
+            
+            # Set the title font size and color
+            title_format = title.text_frame.paragraphs[0]
+            title_format.font.size = Pt(int(slide_data["Font Size"].replace("pt", "")))
+            if slide_data["Text Color"].lower() == "dark blue":
+                title_format.font.color.rgb = RGBColor(0, 0, 139)  # Dark blue color
+            
+            # Add the formatted content with hierarchy
+            add_content_with_hierarchy(slide, slide_data)
+        else:
+            for section in slide_data["Formatted Content"]:
+                for content_line in section["Content"]:
+                    citations.append(content_line)
 
         # Prevent overflow by adjusting the font size if necessary
+        print("Preventing overflow...")
         prevent_overflow(slide)
 
     # Add a citation slide at the end if citations exist
     if citations:
+        print("Creating citation slide...")
+        print(citations)
         create_citation_slide(presentation, citations)
 
     # Save the presentation to a file
-    presentation.save('Neuron_Solutions_Presentation.pptx')
+    presentation.save('OpenAI.pptx')
     print("Presentation created successfully!")
 
 
@@ -140,7 +142,7 @@ def create_presentation(slides_data):
 import json
 
 # Load the JSON data from the uploaded file
-json_file_path = 'slides.json'
+json_file_path = 'condensed_slides.json'
 with open(json_file_path, 'r') as file:
     slides_data = json.load(file)
 

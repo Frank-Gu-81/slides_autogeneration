@@ -1,6 +1,6 @@
  ## Overview
 
-### Introduction
+### Introduction0.
 
 OpenAI, headquartered in San Francisco, California, is a pioneering entity in the field of artificial intelligence, primarily focusing on the development and deployment of cutting-edge AI technologies. Established in 2015, OpenAI initially concentrated on advancing general AI capabilities with the aim of ensuring that artificial intelligence benefits all of humanity. Over the years, the company has evolved to become a leader in AI research and application, consistently pushing the boundaries of what is possible in the realm of machine learning and artificial intelligence.
 

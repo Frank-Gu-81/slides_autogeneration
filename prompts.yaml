@@ -86,7 +86,7 @@ generate_slide_json_prompt: |
 
   1. **Content Inclusion:**
   - **Include all key points, facts, and details** from the content.
-  - **Avoid unnecessary summarization**; ensure important information is retained.
+  - Condense information to fit within 3 slides at your discretion. Dot remove key information and citations. 
   - Use bullet points to break down the content into digestible pieces.
   - **Preserve quotes, citations, and specific terminology** as they appear in the content.
   -- Citation handling: if citations in the format of a number enclosed by a bracket (e.g., [1], [2], etc) is encountered, **keep** that in the sentence and do not modify or remove it. 
@@ -106,8 +106,8 @@ generate_slide_json_prompt: |
   - **Text Color**: As specified above.
 
   4. **Slide Division:**
-  - Split the content logically into multiple slides to ensure clarity.
-  - **If a slide becomes too content-heavy, split it into multiple slides** while maintaining logical flow.
+  - Split the content logically into multiple slides (less than 3 slides) to ensure clarity.
+  - **If a slide becomes too content-heavy, split it into multiple slides** while maintaining logical flow. However, there should be no more than 3 slides, so you can condense at your discretion.
   - **Do not exceed 7 bullet points per slide** to avoid overcrowding.
 
   5. **Citations and Links:**
@@ -216,7 +216,91 @@ generate_slide_json_prompt: |
 
   '''{extracted_structure}'''
 
+generate_combined_slide_prompt: |
+  **Task:**
+
+  Condense the provided JSON slides into a more concise presentation, aiming for a target slide count. Each slide should retain key information but be consolidated with other slides where logical. The JSON output must follow the specified structure, and all citations (e.g., [1], [2], etc.) must be preserved.
+
+  **Instructions:**
+
+  1. **Slide Structure:**
+    - Each slide should have:
+      - A unique, descriptive **Slide Title**.
+      - **Formatted Content** containing:
+      - **Subtitles** where appropriate.
+      - **Bullet Points** with hierarchical structure to represent nested information.
+  - Use hierarchical bullet points for any lists or detailed explanations.
+
+  2. **Content Condensation:**
+      - Condense content to focus on key points, but preserve all citations exactly as they appear (e.g., [1], [2]).
+      - If slides have similar or related topics, combine them to reduce the total slide count.
+      - Ensure that each slide's content does not exceed 90 words, focusing on core information.
+
+  3. **Citations:**
+      - Retain all citations in the exact format provided (e.g., [1], [2]).
+      - Collect all references on a final “Citations” slide, listing each citation in its original format.
+
+  4. **Design and Format:**
+      - Each slide should have:
+          - "Slide Title" (unique, relevant to the slide's content)
+          - "Formatted Content" (with subtitles and bullet points as nested lists where needed)
+          - "Font Size" and "Text Color" for each element
+          - "Overflow Check" (ensure no overflow issues)
+      - Use font sizes: Title (36pt, Dark Blue), Subtitle (28pt, Black), Content (20pt, Black).
+  
+  **Output Format:**
+
+  Return only the JSON output in the exact format below, with no additional text or explanations. 
+  Return everything inside [], do NOT return ```json ```
+
+  [
+      {{
+          "Slide Title": "Executive Summary",
+          "Formatted Content": [
+              {{
+                  "Subtitle": "Neuron Solutions Overview",
+                  "Content": [
+                      "Neuron Solutions, operating under the brand neuron.ai, is a consulting firm specializing in AI solutions across various industries.",
+                      [
+                          "Provides services from conceptualization to implementation of AI projects.",
+                          "Enables businesses to develop their own AI capabilities or integrate supplier AI systems into operations ([1]).",
+                          "Client sectors include pharmaceuticals, energy, and engineering."
+                      ],
+                      "Successfully enhanced operational efficiencies through AI-driven solutions."
+                  ],
+                  "Font Size": "20pt",
+                  "Text Color": "Black"
+              }}
+          ],
+          "Font Size": "36pt",
+          "Text Color": "Dark Blue",
+          "Overflow Check": "No overflow",
+      }},
+      {{
+          "Slide Title": "Citations",
+          "Formatted Content": [
+              {{
+                  "Content": [
+                      "[1] [Neuron Solutions - Your AI consultant](https://www.neuronsolutions.com)",
+                      "[2] [Artificial Intelligence and the Future of Finance - Neuron Solutions](https://www.neuronsolutions.com/finance)"
+                  ],
+                  "Font Size": "20pt",
+                  "Text Color": "Black"
+              }}
+          ],
+          "Font Size": "36pt",
+          "Text Color": "Dark Blue",
+          "Overflow Check": "No overflow"
+      }}
+  ]
+
+  **Process:**
+
+  Review the provided JSON slides and logically combine or condense them to fit the target slide count. Ensure each slide has a unique title, at least one subtitle, and at least one bullet point. Preserve all citations exactly as they appear, and list all citations on a final “Citations” slide. Return only the JSON output.
+  Here is the content to condense:
+  '''{slides_chunk}'''
+
 inference_parameters:
-  model: gpt-4o
+  model: gpt-4o-mini
   temperature: 0.2
   max_token: 4000
