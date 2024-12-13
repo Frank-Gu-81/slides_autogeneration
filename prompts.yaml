@@ -84,12 +84,16 @@ generate_slide_json_prompt: |
 
   **Instructions:**
 
-  1. **Content Inclusion:**
+  1. **Content Inclusion and Important Rules to Follow:**
+  - Group related sub-sections into a cohesive narrative flow.
+  - Condense information to fit within `{pages}` slides at your discretion. Do not remove key information and citations.
+  - The maximum allowed word count limit for each page is 100 words. Condense information at your discretion without removing key information and citations.
   - **Include all key points, facts, and details** from the content.
   - Condense information to fit within 3 slides at your discretion. Dot remove key information and citations. 
   - Use bullet points to break down the content into digestible pieces.
   - **Preserve quotes, citations, and specific terminology** as they appear in the content.
-  -- Citation handling: if citations in the format of a number enclosed by a bracket (e.g., [1], [2], etc) is encountered, **keep** that in the sentence and do not modify or remove it. 
+  - Maintain a maximum bullet point depth of 3 levels.
+  - Citation handling: if citations in the format of a number enclosed by a bracket (e.g., [1], [2], etc) is encountered, **keep** that in the sentence and do not modify or remove it. 
 
   2. **Slide Structure:**
   - Each slide should have:

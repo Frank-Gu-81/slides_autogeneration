@@ -23,7 +23,9 @@ def add_content_with_hierarchy(slide, slide_data):
 
     for section in slide_data["Formatted Content"]:
         # Add Subtitle (as second-level heading)
-        subtitle_paragraph = text_frame.add_paragraph()
+        # subtitle_paragraph = text_frame.add_paragraph()
+        # don't start a new paragraph for the subtitle
+        subtitle_paragraph = text_frame.paragraphs[-1]
         run_subtitle = set_font(subtitle_paragraph, 20, section["Text Color"])
         run_subtitle.text = section.get("Subtitle", "")
         subtitle_paragraph.level = 0  # Subtitle level
@@ -123,8 +125,8 @@ def create_presentation(slides_data):
                     citations.append(content_line)
 
         # Prevent overflow by adjusting the font size if necessary
-        print("Preventing overflow...")
-        prevent_overflow(slide)
+        # print("Preventing overflow...")
+        # prevent_overflow(slide)
 
     # Add a citation slide at the end if citations exist
     if citations:
@@ -133,7 +135,7 @@ def create_presentation(slides_data):
         create_citation_slide(presentation, citations)
 
     # Save the presentation to a file
-    presentation.save('OpenAI.pptx')
+    presentation.save('OpenAI_1.pptx')
     print("Presentation created successfully!")
 
 
@@ -142,7 +144,7 @@ def create_presentation(slides_data):
 import json
 
 # Load the JSON data from the uploaded file
-json_file_path = 'condensed_slides.json'
+json_file_path = 'slides.json'
 with open(json_file_path, 'r') as file:
     slides_data = json.load(file)
 

@@ -38,9 +38,9 @@ def step_1_extract_structure(md_content, title="Extract Markdown Structure"):
     extract_structure_prompt = api_prompts['extract_structure_prompt'].format(title=title, md_content=md_content)
     return extract_structure_prompt
 
-def step_2_generate_slide_json_prompt(extracted_structure):
+def step_2_generate_slide_json_prompt(extracted_structure, pages=3):
     # Prepare the prompt
-    generate_slide_json_prompt = api_prompts['generate_slide_json_prompt'].format(extracted_structure=extracted_structure)
+    generate_slide_json_prompt = api_prompts['generate_slide_json_prompt'].format(pages=pages, extracted_structure=extracted_structure)
     return generate_slide_json_prompt
 
 def step_3_condense_slide_json_prompt(slide_json):
@@ -140,21 +140,14 @@ if __name__ == "__main__":
     with open('latest_report.md', 'r') as file:
         markdown_content = file.read()
 
+    # Perform iterative structure extraction
+    iterative_structure_extraction(markdown_content)
+
     with open('slides.json', 'r') as file:
         original_json = json.load(file)
 
-    # with open('temp_chunks.json', 'r') as file:
-    #     chunk_json = json.load(file)
-
-    # for each in chunk_json:
-    #     print(each)
-    #     print("=====================================")
-
-    # Perform iterative structure extraction
-    # iterative_structure_extraction(markdown_content)
-
     # Perform side condensation
-    side_condensation(original_json, 10)
+    # side_condensation(original_json, 10)
     
 
     
